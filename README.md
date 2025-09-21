@@ -1,15 +1,21 @@
 # Building Visualizer (Maven Version)
 
 ## 프로젝트 개요
-건물 평면 좌표 데이터를 시각화하는 Java Swing 애플리케이션입니다. Excel 파일에서 좌표 데이터를 읽어와 Python을 통해 그래프를 생성하고 결과를 GUI에 표시합니다.
+건물 3D 좌표 데이터를 시각화하는 Java Swing 애플리케이션입니다. Excel 파일에서 좌표 데이터를 읽어와 Python을 통해 2D/3D 그래프를 생성하고, JavaFX를 통해 인터랙티브 3D 뷰어를 제공합니다.
+
+## 🚀 바로 다운로드
+**최신 EXE 파일**: [BuildingVisualizer.zip 다운로드](https://github.com/ittnw39/Building-Visualizer/releases/latest/download/BuildingVisualizer.zip)
+
+> 💡 **설치 없이 바로 실행 가능**: Java 설치 없이도 실행할 수 있는 독립 실행 파일입니다.
 
 ## 프로젝트 구성
 
 ### 핵심 파일
-- `visualize.py`: Python 시각화 스크립트 (Excel → 그래프)
+- `visualize.py`: Python 시각화 스크립트 (Excel → 2D/3D 그래프)
 - `pom.xml`: Maven 프로젝트 설정
 - `requirements.txt`: Python 의존성 패키지 목록
 - `coords.xlsx`: 샘플 좌표 데이터
+- `3d_data.json`: JavaFX 3D 뷰어용 데이터 파일
 
 ### Java 소스 구조 (MVC 패턴)
 ```
@@ -24,7 +30,8 @@ src/main/java/com/example/visualizer/
 │   ├── ControlPanel.java           # 컨트롤 패널
 │   ├── FileInfoPanel.java          # 파일 정보 패널
 │   ├── ProgressPanel.java          # 진행 상태 패널
-│   └── VisualizationPanel.java     # 시각화 결과 패널
+│   ├── VisualizationPanel.java     # 시각화 결과 패널
+│   └── Interactive3DViewer.java    # JavaFX 3D 인터랙티브 뷰어
 ├── controller/                     # 컨트롤러
 │   ├── MainController.java         # 메인 컨트롤러
 │   ├── ExcelController.java        # 엑셀 처리 컨트롤러
@@ -72,34 +79,61 @@ java -cp target/building-visualizer-1.0-SNAPSHOT.jar com.example.visualizer.Buil
 ## 사용 방법
 
 ### GUI 사용법
-1. **애플리케이션 실행**: `mvn exec:java` 명령어로 실행
+1. **애플리케이션 실행**: EXE 파일 실행 또는 `mvn exec:java` 명령어로 실행
 2. **Excel 파일 선택**: "엑셀 열기" 버튼 클릭하여 좌표 데이터가 포함된 Excel 파일 선택
 3. **데이터 확인**: 선택한 파일의 데이터가 테이블에 표시됨
-4. **단위 변환 설정**: "단위 변환 배율" 필드에 변환 비율 입력
-   - 예: `0.001` (mm → m), `1000` (m → mm)
+4. **단위 설정**:
+   - **단위 변환 배율**: Python 시각화용 전체 스케일 (예: `0.001` (mm → m))
+   - **축 단위 (3D 뷰어용)**: X, Y, Z축 개별 단위 스케일링
 5. **시각화 실행**: "시각화 실행" 버튼 클릭
-6. **결과 확인**: 하단에 생성된 그래프 이미지가 표시됨
+6. **결과 확인**: 
+   - **2D 이미지**: Python으로 생성된 2D/3D 그래프
+   - **3D 인터랙티브**: JavaFX 3D 뷰어에서 실시간 조작 가능
 
 ### Excel 파일 형식
 Excel 파일은 다음 컬럼을 포함해야 합니다:
 - `x`: X 좌표값
 - `y`: Y 좌표값
+- `z`: Z 좌표값 (3D 시각화용, 선택사항)
 - `type`: (선택사항) 그룹 분류용 컬럼
 
 ### 출력 파일
 실행 후 다음 파일들이 생성됩니다:
-- `coords_plot.png`: 시각화된 그래프 이미지
-- `coords_with_plot.xlsx`: 처리된 좌표 데이터가 포함된 Excel 파일
+- `coords_plot.png`: 시각화된 2D/3D 그래프 이미지
+- `coords_with_plot.xlsx`: 처리된 좌표 데이터와 그래프 이미지가 포함된 Excel 파일
+- `3d_data.json`: JavaFX 3D 뷰어용 데이터 파일
 
 ## 주요 기능
+
+### 📊 2D/3D 시각화
 - **Excel 데이터 로딩**: Apache POI를 사용한 Excel 파일 읽기
 - **데이터 테이블 표시**: JTable을 통한 데이터 미리보기
 - **단위 변환**: 사용자 정의 배율로 좌표 단위 변환
-- **Python 시각화**: matplotlib을 사용한 고품질 그래프 생성
+- **Python 시각화**: matplotlib을 사용한 고품질 2D/3D 그래프 생성
+- **동적 축 눈금**: 데이터 크기에 따라 자동으로 축 눈금 조정
 - **그룹별 색상**: type 컬럼이 있는 경우 자동으로 그룹별 색상 지정
+- **CAD 스타일**: 작은 점 크기로 정밀한 시각화
+
+### 🎮 인터랙티브 3D 뷰어
+- **JavaFX 3D**: 실시간 3D 모델 뷰어
+- **마우스 조작**: 
+  - 드래그: 회전 (Orbit)
+  - Shift + 드래그: 이동 (Pan)
+  - 휠: 확대/축소
+- **키보드 단축키**:
+  - `W/S`: X축 회전
+  - `A/D`: Y축 회전
+  - `Q/E`: Z축 회전
+  - `+/-`: 확대/축소
+  - `R`: 뷰 리셋
+- **동적 카메라**: 데이터 크기에 따라 자동 카메라 위치 조정
+- **축 단위 설정**: X, Y, Z축 개별 단위 스케일링
+
+### 📁 파일 관리
 - **실시간 결과 표시**: GUI 내에서 생성된 이미지 즉시 확인
 - **진행 상태 표시**: 시각화 과정의 실시간 진행 상황 표시
 - **결과 파일 관리**: 생성된 엑셀 파일 자동 열기 기능
+- **이미지 임베딩**: 2D 그래프를 결과 엑셀 파일에 자동 삽입
 
 ## MVC 패턴 적용의 장점
 - **모듈화**: 각 기능이 독립적인 클래스로 분리되어 유지보수 용이
@@ -134,7 +168,7 @@ java -cp target/building-visualizer-1.0-SNAPSHOT.jar com.example.visualizer.Buil
 - **문제**: "Log4j2 could not find a logging implementation" 경고
 - **해결**: 이는 정상적인 경고이며 애플리케이션 실행에는 영향 없음
 
-## EXE 파일 생성 방법
+## 📦 EXE 파일 생성 방법
 
 ### jpackage를 사용한 EXE 생성
 Java 14+에서 제공하는 jpackage 도구를 사용하여 독립 실행 가능한 exe 파일을 생성할 수 있습니다.
@@ -170,9 +204,27 @@ mvn clean package
 - **독립 실행**: Java 런타임이 포함되어 별도 Java 설치 불필요
 - **간편한 배포**: 단일 폴더로 모든 파일 포함
 - **사용자 친화적**: 일반 Windows 애플리케이션처럼 실행
+- **Python 포함**: Python 런타임과 필요한 패키지가 모두 포함됨
+
+## 🎯 최신 업데이트 (2025.09.21)
+
+### ✨ 새로운 기능
+- **인터랙티브 3D 뷰어**: JavaFX 기반 실시간 3D 모델 조작
+- **동적 카메라 조정**: 데이터 크기에 따라 자동 카메라 위치 최적화
+- **축 단위 개별 설정**: X, Y, Z축 각각의 단위 스케일링 지원
+- **동적 축 눈금**: 데이터 범위에 따라 자동 축 눈금 조정
+- **CAD 스타일 시각화**: 정밀한 작은 점 크기로 고품질 그래프
+- **이미지 임베딩**: 2D 그래프를 결과 엑셀 파일에 자동 삽입
+
+### 🔧 개선사항
+- **MVC 패턴 적용**: 코드 구조 개선으로 유지보수성 향상
+- **키보드/마우스 조작**: 직관적인 3D 뷰어 조작 인터페이스
+- **실시간 진행 표시**: 시각화 과정의 실시간 피드백
+- **한글 폰트 지원**: matplotlib 한글 폰트 자동 설정
 
 ## 개발 환경
 - **Java**: OpenJDK 21
+- **JavaFX**: 17.0.2 (3D 뷰어용)
 - **Maven**: 3.9.11
 - **Python**: 3.13
 - **IDE**: IntelliJ IDEA / Eclipse 권장
