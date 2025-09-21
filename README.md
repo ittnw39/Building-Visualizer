@@ -100,12 +100,17 @@ Excel 파일은 다음 컬럼을 포함해야 합니다:
 - `type`: (선택사항) 그룹 분류용 컬럼
 
 ### 출력 파일
-실행 후 다음 파일들이 **EXE와 같은 폴더**에 생성됩니다:
-- `coords_plot_YYYYMMDD_HHMMSS.png`: 시각화된 2D/3D 그래프 이미지 (타임스탬프 포함)
-- `coords_with_plot_YYYYMMDD_HHMMSS.xlsx`: 처리된 좌표 데이터와 그래프 이미지가 포함된 Excel 파일
-- `3d_data_YYYYMMDD_HHMMSS.json`: JavaFX 3D 뷰어용 데이터 파일
+실행 후 **사용자 Downloads 폴더**에 실행별 폴더가 생성됩니다:
 
-> 💡 **파일 저장 위치**: 모든 결과 파일은 EXE 파일과 같은 폴더에 저장되어 쉽게 찾을 수 있습니다.
+```
+Downloads/
+└── BuildingVisualizer_YYYYMMDD_HHMMSS/
+    ├── coords_plot.png              # 시각화된 2D/3D 그래프 이미지
+    ├── coords_with_plot.xlsx        # 처리된 좌표 데이터와 그래프 이미지가 포함된 Excel 파일
+    └── 3d_data.json                 # JavaFX 3D 뷰어용 데이터 파일
+```
+
+> 💡 **파일 저장 위치**: 각 실행마다 `C:\Users\[사용자명]\Downloads\BuildingVisualizer_YYYYMMDD_HHMMSS` 폴더가 생성되어 결과 파일들이 정리됩니다.
 
 ## 주요 기능
 
@@ -220,14 +225,14 @@ mvn clean package
 - **CAD 스타일 시각화**: 정밀한 작은 점 크기로 고품질 그래프
 - **이미지 임베딩**: 2D 그래프를 결과 엑셀 파일에 자동 삽입
 - **타임스탬프 파일명**: 실행할 때마다 고유한 파일명으로 결과 저장
-- **EXE 경로 저장**: 결과 파일이 EXE와 같은 폴더에 저장되어 쉽게 찾기
+- **실행별 폴더 저장**: 각 실행마다 별도 폴더에 결과 파일들이 정리되어 저장
 
 ### 🔧 개선사항
 - **MVC 패턴 적용**: 코드 구조 개선으로 유지보수성 향상
 - **키보드/마우스 조작**: 직관적인 3D 뷰어 조작 인터페이스
 - **실시간 진행 표시**: 시각화 과정의 실시간 피드백
 - **한글 폰트 지원**: matplotlib 한글 폰트 자동 설정
-- **경로 문제 해결**: 어떤 컴퓨터에서든 EXE와 같은 폴더에 결과 저장
+- **경로 문제 해결**: 어떤 컴퓨터에서든 Downloads 폴더에 실행별 폴더로 결과 저장
 - **Windows Defender 대응**: EXE 파일 경고에 대한 사용자 안내 추가
 
 ## 개발 환경

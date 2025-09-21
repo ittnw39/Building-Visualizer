@@ -207,25 +207,34 @@ def visualize_excel(file_path, unit_scale=1.0, output_dir=None):
     # 여백 조정으로 이미지가 잘리지 않도록 함
     plt.tight_layout()
 
-    if not output_dir:
-        # EXE와 같은 폴더에 저장하도록 수정
-        if getattr(sys, 'frozen', False):
-            # PyInstaller나 jpackage로 패키징된 경우
-            output_dir = os.path.dirname(sys.executable)
-        else:
-            # 개발 환경에서 실행하는 경우
-            output_dir = os.path.dirname(file_path) or '.'
-    os.makedirs(output_dir, exist_ok=True)
-    
     # 타임스탬프를 포함한 고유한 파일명 생성
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    img_path = os.path.join(output_dir, f"coords_plot_{timestamp}.png")
+    
+    if not output_dir:
+        # 사용자 Downloads 폴더에 실행별 폴더 생성
+        # EXE 실행 여부를 더 확실하게 체크
+        is_exe = (getattr(sys, 'frozen', False) or 
+                 hasattr(sys, '_MEIPASS') or 
+                 os.path.basename(sys.executable).endswith('.exe'))
+        
+        if is_exe:
+            # EXE로 실행된 경우 - Downloads 폴더에 실행별 폴더 생성
+            downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+            output_dir = os.path.join(downloads_path, f"BuildingVisualizer_{timestamp}")
+            print(f"EXE 실행 감지: Downloads 폴더에 저장 - {output_dir}")
+        else:
+            # 개발 환경에서 실행하는 경우
+            output_dir = os.path.dirname(file_path) or '.'
+            print(f"개발 환경 실행: 현재 폴더에 저장 - {output_dir}")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    img_path = os.path.join(output_dir, "coords_plot.png")
     plt.savefig(img_path, dpi=150, bbox_inches='tight')
     plt.close()
 
-    # 엑셀 파일에 이미지 삽입 (타임스탬프 포함)
-    out_excel = os.path.join(output_dir, f"coords_with_plot_{timestamp}.xlsx")
+    # 엑셀 파일에 이미지 삽입
+    out_excel = os.path.join(output_dir, "coords_with_plot.xlsx")
     
     # 원본 데이터를 엑셀에 저장
     with pd.ExcelWriter(out_excel, engine="openpyxl") as writer:
@@ -251,7 +260,7 @@ def visualize_excel(file_path, unit_scale=1.0, output_dir=None):
 
         return img_path, out_excel
 
-def send_3d_data_to_java(df, unit_scale=1.0):
+def send_3d_data_to_java(df, unit_scale=1.0, output_dir=None):
     """Java 3D 뷰어에 데이터 전송"""
     try:
         import socket
@@ -290,10 +299,13 @@ def send_3d_data_to_java(df, unit_scale=1.0):
             print(f"3D 데이터 전송 완료: {len(points)}개 포인트")
         except:
             # HTTP 전송 실패 시 파일로 저장
-            json_path = os.path.join(output_dir, f"3d_data_{timestamp}.json")
-            with open(json_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            print(f"3D 데이터 파일 저장: {json_path} ({len(points)}개 포인트)")
+            if output_dir:
+                json_path = os.path.join(output_dir, "3d_data.json")
+                with open(json_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                print(f"3D 데이터 파일 저장: {json_path} ({len(points)}개 포인트)")
+            else:
+                print("3D 데이터 전송 실패: output_dir이 설정되지 않음")
             
     except Exception as e:
         print(f"3D 데이터 전송 실패: {e}")
@@ -323,4 +335,4 @@ if __name__ == "__main__":
     print("Saved excel:", out)
     
     # 3D 데이터 전송
-    send_3d_data_to_java(df, unit_scale)
+    send_3d_data_to_java(df, unit_scale, os.path.dirname(img))

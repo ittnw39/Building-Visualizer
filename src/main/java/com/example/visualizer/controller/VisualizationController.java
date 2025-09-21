@@ -73,12 +73,30 @@ public class VisualizationController {
                 // Python 시각화 실행
                 pythonService.runVisualization(excelData, unitScale, this::updateProgress);
                 
-                // 결과 파일 경로 찾기
-                String resultFileName = "coords_with_plot.xlsx";
-                String imageFileName = "coords_plot.png";
+                // 결과 파일 경로 찾기 - Downloads 폴더의 실행별 폴더에서 찾기
+                String downloadsPath = System.getProperty("user.home") + File.separator + "Downloads";
+                File downloadsDir = new File(downloadsPath);
+                File[] buildingDirs = downloadsDir.listFiles((dir, name) -> name.startsWith("BuildingVisualizer_"));
                 
-                File resultFile = new File(resultFileName);
-                File imageFile = new File(imageFileName);
+                File resultFile = null;
+                File imageFile = null;
+                
+                if (buildingDirs != null && buildingDirs.length > 0) {
+                    // 가장 최근 폴더 선택
+                    File latestDir = buildingDirs[0];
+                    for (File dir : buildingDirs) {
+                        if (dir.lastModified() > latestDir.lastModified()) {
+                            latestDir = dir;
+                        }
+                    }
+                    
+                    resultFile = new File(latestDir, "coords_with_plot.xlsx");
+                    imageFile = new File(latestDir, "coords_plot.png");
+                } else {
+                    // 기존 방식 (현재 디렉토리에서 찾기)
+                    resultFile = new File("coords_with_plot.xlsx");
+                    imageFile = new File("coords_plot.png");
+                }
                 
                 if (resultFile.exists() && imageFile.exists()) {
                     lastResult = new VisualizationResult(imageFile, resultFile, unitScale);
@@ -133,35 +151,30 @@ public class VisualizationController {
      * Excel 데이터에서 3D 포인트 추출하여 표시
      */
     private void display3DDataFromExcel() {
-        // Python에서 생성된 3D 데이터 JSON 파일 읽기 (타임스탬프 포함)
-        File currentDir = new File(".");
-        File[] jsonFiles = currentDir.listFiles((dir, name) -> name.startsWith("3d_data_") && name.endsWith(".json"));
+        // Python에서 생성된 3D 데이터 JSON 파일 읽기
+        // Downloads 폴더에서 BuildingVisualizer_* 폴더들 찾기
+        String downloadsPath = System.getProperty("user.home") + File.separator + "Downloads";
+        File downloadsDir = new File(downloadsPath);
+        File[] buildingDirs = downloadsDir.listFiles((dir, name) -> name.startsWith("BuildingVisualizer_"));
         
-        if (jsonFiles != null && jsonFiles.length > 0) {
-            // 가장 최근 파일 선택 (타임스탬프 기준)
-            File latestJsonFile = jsonFiles[0];
-            for (File file : jsonFiles) {
-                if (file.lastModified() > latestJsonFile.lastModified()) {
-                    latestJsonFile = file;
+        if (buildingDirs != null && buildingDirs.length > 0) {
+            // 가장 최근 폴더 선택 (폴더명의 타임스탬프 기준)
+            File latestDir = buildingDirs[0];
+            for (File dir : buildingDirs) {
+                if (dir.lastModified() > latestDir.lastModified()) {
+                    latestDir = dir;
                 }
             }
             
-            try {
-                load3DDataFromJson(latestJsonFile);
-                return;
-            } catch (Exception e) {
-                System.err.println("JSON 파일 읽기 실패: " + e.getMessage());
-            }
-        }
-        
-        // 기존 방식 (타임스탬프 없는 파일)도 시도
-        File jsonFile = new File("3d_data.json");
-        if (jsonFile.exists()) {
-            try {
-                load3DDataFromJson(jsonFile);
-                return;
-            } catch (Exception e) {
-                System.err.println("JSON 파일 읽기 실패: " + e.getMessage());
+            // 해당 폴더에서 3d_data.json 파일 찾기
+            File jsonFile = new File(latestDir, "3d_data.json");
+            if (jsonFile.exists()) {
+                try {
+                    load3DDataFromJson(jsonFile);
+                    return;
+                } catch (Exception e) {
+                    System.err.println("JSON 파일 읽기 실패: " + e.getMessage());
+                }
             }
         }
         
