@@ -4,11 +4,36 @@
 건물 평면 좌표 데이터를 시각화하는 Java Swing 애플리케이션입니다. Excel 파일에서 좌표 데이터를 읽어와 Python을 통해 그래프를 생성하고 결과를 GUI에 표시합니다.
 
 ## 프로젝트 구성
+
+### 핵심 파일
 - `visualize.py`: Python 시각화 스크립트 (Excel → 그래프)
-- `src/main/java/com/example/visualizer/BuildingVisualizer.java`: Java Swing UI
 - `pom.xml`: Maven 프로젝트 설정
 - `requirements.txt`: Python 의존성 패키지 목록
 - `coords.xlsx`: 샘플 좌표 데이터
+
+### Java 소스 구조 (MVC 패턴)
+```
+src/main/java/com/example/visualizer/
+├── BuildingVisualizer.java          # 메인 애플리케이션 클래스
+├── model/                           # 데이터 모델
+│   ├── ExcelData.java              # 엑셀 데이터 모델
+│   ├── VisualizationResult.java    # 시각화 결과 모델
+│   └── ProgressInfo.java           # 진행 상태 모델
+├── view/                           # UI 뷰 컴포넌트
+│   ├── MainFrame.java              # 메인 프레임
+│   ├── ControlPanel.java           # 컨트롤 패널
+│   ├── FileInfoPanel.java          # 파일 정보 패널
+│   ├── ProgressPanel.java          # 진행 상태 패널
+│   └── VisualizationPanel.java     # 시각화 결과 패널
+├── controller/                     # 컨트롤러
+│   ├── MainController.java         # 메인 컨트롤러
+│   ├── ExcelController.java        # 엑셀 처리 컨트롤러
+│   └── VisualizationController.java # 시각화 컨트롤러
+└── service/                        # 비즈니스 로직 서비스
+    ├── ExcelService.java           # 엑셀 파일 처리 서비스
+    ├── PythonService.java          # Python 시각화 서비스
+    └── FileService.java            # 파일 관리 서비스
+```
 
 ## 시스템 요구사항
 - **Java**: JDK 17 이상
@@ -73,6 +98,15 @@ Excel 파일은 다음 컬럼을 포함해야 합니다:
 - **Python 시각화**: matplotlib을 사용한 고품질 그래프 생성
 - **그룹별 색상**: type 컬럼이 있는 경우 자동으로 그룹별 색상 지정
 - **실시간 결과 표시**: GUI 내에서 생성된 이미지 즉시 확인
+- **진행 상태 표시**: 시각화 과정의 실시간 진행 상황 표시
+- **결과 파일 관리**: 생성된 엑셀 파일 자동 열기 기능
+
+## MVC 패턴 적용의 장점
+- **모듈화**: 각 기능이 독립적인 클래스로 분리되어 유지보수 용이
+- **재사용성**: Service 클래스들을 다른 프로젝트에서 재사용 가능
+- **확장성**: 새로운 기능 추가 시 기존 코드 수정 최소화
+- **테스트 용이성**: 각 컴포넌트를 독립적으로 테스트 가능
+- **코드 가독성**: 역할별로 명확히 분리된 구조로 이해하기 쉬움
 
 ## 문제 해결
 

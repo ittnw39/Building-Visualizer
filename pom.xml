@@ -18,6 +18,22 @@
       <artifactId>poi-ooxml</artifactId>
       <version>5.2.5</version>
     </dependency>
+    <!-- JavaFX 의존성 -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>17.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>17.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-swing</artifactId>
+      <version>17.0.2</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -37,6 +53,12 @@
         <version>3.1.0</version>
         <configuration>
           <mainClass>com.example.visualizer.BuildingVisualizer</mainClass>
+          <options>
+            <option>--module-path</option>
+            <option>${project.build.directory}/classes:${project.build.directory}/dependency/*</option>
+            <option>--add-modules</option>
+            <option>javafx.controls,javafx.fxml,javafx.swing</option>
+          </options>
         </configuration>
       </plugin>
       <plugin>
