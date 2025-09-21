@@ -4,7 +4,7 @@
 건물 3D 좌표 데이터를 시각화하는 Java Swing 애플리케이션입니다. Excel 파일에서 좌표 데이터를 읽어와 Python을 통해 2D/3D 그래프를 생성하고, JavaFX를 통해 인터랙티브 3D 뷰어를 제공합니다.
 
 ## 🚀 바로 다운로드
-**최신 EXE 파일**: [BuildingVisualizer.zip 다운로드](https://github.com/ittnw39/Building-Visualizer/releases/download/v1.0.0/BuildingVisualizer.zip)
+**최신 EXE 파일**: [BuildingVisualizer.zip 다운로드](https://github.com/ittnw39/Building-Visualizer/releases/latest/download/BuildingVisualizer.zip)
 
 > 💡 **설치 없이 바로 실행 가능**: Java 설치 없이도 실행할 수 있는 독립 실행 파일입니다.
 
