@@ -208,14 +208,24 @@ def visualize_excel(file_path, unit_scale=1.0, output_dir=None):
     plt.tight_layout()
 
     if not output_dir:
-        output_dir = os.path.dirname(file_path) or '.'
+        # EXE와 같은 폴더에 저장하도록 수정
+        if getattr(sys, 'frozen', False):
+            # PyInstaller나 jpackage로 패키징된 경우
+            output_dir = os.path.dirname(sys.executable)
+        else:
+            # 개발 환경에서 실행하는 경우
+            output_dir = os.path.dirname(file_path) or '.'
     os.makedirs(output_dir, exist_ok=True)
-    img_path = os.path.join(output_dir, "coords_plot.png")
+    
+    # 타임스탬프를 포함한 고유한 파일명 생성
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    img_path = os.path.join(output_dir, f"coords_plot_{timestamp}.png")
     plt.savefig(img_path, dpi=150, bbox_inches='tight')
     plt.close()
 
-    # 엑셀 파일에 이미지 삽입
-    out_excel = os.path.join(output_dir, "coords_with_plot.xlsx")
+    # 엑셀 파일에 이미지 삽입 (타임스탬프 포함)
+    out_excel = os.path.join(output_dir, f"coords_with_plot_{timestamp}.xlsx")
     
     # 원본 데이터를 엑셀에 저장
     with pd.ExcelWriter(out_excel, engine="openpyxl") as writer:
@@ -280,9 +290,10 @@ def send_3d_data_to_java(df, unit_scale=1.0):
             print(f"3D 데이터 전송 완료: {len(points)}개 포인트")
         except:
             # HTTP 전송 실패 시 파일로 저장
-            with open('3d_data.json', 'w', encoding='utf-8') as f:
+            json_path = os.path.join(output_dir, f"3d_data_{timestamp}.json")
+            with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-            print(f"3D 데이터 파일 저장: 3d_data.json ({len(points)}개 포인트)")
+            print(f"3D 데이터 파일 저장: {json_path} ({len(points)}개 포인트)")
             
     except Exception as e:
         print(f"3D 데이터 전송 실패: {e}")

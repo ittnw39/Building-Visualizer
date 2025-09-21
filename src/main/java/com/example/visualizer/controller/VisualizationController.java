@@ -133,7 +133,28 @@ public class VisualizationController {
      * Excel 데이터에서 3D 포인트 추출하여 표시
      */
     private void display3DDataFromExcel() {
-        // Python에서 생성된 3D 데이터 JSON 파일 읽기
+        // Python에서 생성된 3D 데이터 JSON 파일 읽기 (타임스탬프 포함)
+        File currentDir = new File(".");
+        File[] jsonFiles = currentDir.listFiles((dir, name) -> name.startsWith("3d_data_") && name.endsWith(".json"));
+        
+        if (jsonFiles != null && jsonFiles.length > 0) {
+            // 가장 최근 파일 선택 (타임스탬프 기준)
+            File latestJsonFile = jsonFiles[0];
+            for (File file : jsonFiles) {
+                if (file.lastModified() > latestJsonFile.lastModified()) {
+                    latestJsonFile = file;
+                }
+            }
+            
+            try {
+                load3DDataFromJson(latestJsonFile);
+                return;
+            } catch (Exception e) {
+                System.err.println("JSON 파일 읽기 실패: " + e.getMessage());
+            }
+        }
+        
+        // 기존 방식 (타임스탬프 없는 파일)도 시도
         File jsonFile = new File("3d_data.json");
         if (jsonFile.exists()) {
             try {
