@@ -4,9 +4,11 @@
 건물 3D 좌표 데이터를 시각화하는 Java Swing 애플리케이션입니다. Excel 파일에서 좌표 데이터를 읽어와 Python을 통해 2D/3D 그래프를 생성하고, JavaFX를 통해 인터랙티브 3D 뷰어를 제공합니다.
 
 ## 🚀 바로 다운로드
-**최신 EXE 파일**: [BuildingVisualizer.zip 다운로드](https://github.com/ittnw39/Building-Visualizer/releases/download/v1.0.0/BuildingVisualizer.zip)
+**최신 EXE 파일**: [BuildingVisualizer_v1.0.1.zip 다운로드](https://github.com/ittnw39/Building-Visualizer/releases/download/v1.0.0/BuildingVisualizer_v1.0.1.zip)
 
 > 💡 **설치 없이 바로 실행 가능**: Java 설치 없이도 실행할 수 있는 독립 실행 파일입니다.
+> 
+> ⚠️ **Windows Defender 경고**: EXE 파일이 포함되어 있어 Windows Defender에서 경고가 나타날 수 있습니다. 이는 정상적인 현상이며, "추가 정보" → "실행"을 클릭하여 실행하세요.
 
 ## 프로젝트 구성
 
@@ -43,9 +45,9 @@ src/main/java/com/example/visualizer/
 ```
 
 ## 시스템 요구사항
-- **Java**: JDK 17 이상
-- **Python**: Python 3.7 이상
-- **Maven**: 3.6 이상
+- **Java**: JDK 17 이상 (EXE 버전은 Java 설치 불필요)
+- **Python**: Python 3.7 이상 (EXE 버전은 Python 설치 불필요)
+- **Maven**: 3.6 이상 (EXE 버전은 Maven 설치 불필요)
 - **운영체제**: Windows 10/11
 
 ## 상세 설치 및 실행 방법
@@ -98,10 +100,12 @@ Excel 파일은 다음 컬럼을 포함해야 합니다:
 - `type`: (선택사항) 그룹 분류용 컬럼
 
 ### 출력 파일
-실행 후 다음 파일들이 생성됩니다:
-- `coords_plot.png`: 시각화된 2D/3D 그래프 이미지
-- `coords_with_plot.xlsx`: 처리된 좌표 데이터와 그래프 이미지가 포함된 Excel 파일
-- `3d_data.json`: JavaFX 3D 뷰어용 데이터 파일
+실행 후 다음 파일들이 **EXE와 같은 폴더**에 생성됩니다:
+- `coords_plot_YYYYMMDD_HHMMSS.png`: 시각화된 2D/3D 그래프 이미지 (타임스탬프 포함)
+- `coords_with_plot_YYYYMMDD_HHMMSS.xlsx`: 처리된 좌표 데이터와 그래프 이미지가 포함된 Excel 파일
+- `3d_data_YYYYMMDD_HHMMSS.json`: JavaFX 3D 뷰어용 데이터 파일
+
+> 💡 **파일 저장 위치**: 모든 결과 파일은 EXE 파일과 같은 폴더에 저장되어 쉽게 찾을 수 있습니다.
 
 ## 주요 기능
 
@@ -215,12 +219,16 @@ mvn clean package
 - **동적 축 눈금**: 데이터 범위에 따라 자동 축 눈금 조정
 - **CAD 스타일 시각화**: 정밀한 작은 점 크기로 고품질 그래프
 - **이미지 임베딩**: 2D 그래프를 결과 엑셀 파일에 자동 삽입
+- **타임스탬프 파일명**: 실행할 때마다 고유한 파일명으로 결과 저장
+- **EXE 경로 저장**: 결과 파일이 EXE와 같은 폴더에 저장되어 쉽게 찾기
 
 ### 🔧 개선사항
 - **MVC 패턴 적용**: 코드 구조 개선으로 유지보수성 향상
 - **키보드/마우스 조작**: 직관적인 3D 뷰어 조작 인터페이스
 - **실시간 진행 표시**: 시각화 과정의 실시간 피드백
 - **한글 폰트 지원**: matplotlib 한글 폰트 자동 설정
+- **경로 문제 해결**: 어떤 컴퓨터에서든 EXE와 같은 폴더에 결과 저장
+- **Windows Defender 대응**: EXE 파일 경고에 대한 사용자 안내 추가
 
 ## 개발 환경
 - **Java**: OpenJDK 21
