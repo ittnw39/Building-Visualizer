@@ -5,9 +5,9 @@ import math
 def create_real_pantheon():
     """실제 로마 판테온을 참고한 정확한 구조"""
     
-    # 판테온 실제 치수 (축소 버전)
+    # 판테온 실제 치수 (X,Y와 비슷한 스케일로 조정)
     radius = 21.5  # 판테온 내부 반지름
-    height = 21.5  # 돔 높이 (구형)
+    height = 12    # 돔 높이 (구형) - X,Y 범위에 맞춤
     portico_width = 15  # 포르티코 폭
     portico_depth = 8   # 포르티코 깊이
     
@@ -25,8 +25,8 @@ def create_real_pantheon():
         x_inner = radius * math.cos(angle)
         y_inner = radius * math.sin(angle)
         
-        # 벽체 (높이 15m)
-        for z in np.linspace(0, 15, 16):
+        # 벽체 (높이 8m)
+        for z in np.linspace(0, 8, 9):
             data.append({
                 'x': x_outer,
                 'y': y_outer,
@@ -40,13 +40,15 @@ def create_real_pantheon():
                 'type': '내벽'
             })
     
-    # 2. 거대한 돔 (반구형)
+    # 2. 거대한 돔 (완만한 곡선)
     print("거대한 돔 생성 중...")
     for angle_xy in np.linspace(0, 2*math.pi, 64):
         for angle_z in np.linspace(0, math.pi/2, 32):  # 반구
-            x = radius * math.cos(angle_xy) * math.sin(angle_z)
-            y = radius * math.sin(angle_xy) * math.sin(angle_z)
-            z = 15 + radius * math.cos(angle_z)  # 벽 위에서 시작
+            # 더 완만한 곡선을 위해 sin^2 사용
+            curve_factor = math.sin(angle_z) ** 0.7  # 0.7 지수로 더 완만하게
+            x = radius * math.cos(angle_xy) * curve_factor
+            y = radius * math.sin(angle_xy) * curve_factor
+            z = 8 + height * math.cos(angle_z)  # 벽 위에서 시작
             
             data.append({
                 'x': x,
@@ -63,7 +65,7 @@ def create_real_pantheon():
     for angle in np.linspace(0, 2*math.pi, 32):
         x = oculus_radius * math.cos(angle)
         y = oculus_radius * math.sin(angle)
-        z = 15 + radius  # 돔 꼭대기
+        z = 8 + height  # 돔 꼭대기
         data.append({
             'x': x,
             'y': y,
@@ -74,14 +76,14 @@ def create_real_pantheon():
     # 4. 포르티코 (기둥 현관) - 판테온의 특징적인 입구
     print("포르티코 생성 중...")
     num_columns = 16  # 기둥 개수
-    column_height = 12  # 기둥 높이
+    column_height = 6   # 기둥 높이
     
     # 기둥들 (입구 앞)
     for i in range(num_columns):
         x = -portico_width/2 + (i * portico_width / (num_columns-1))
         y = radius + wall_thickness + 2  # 외벽 앞
         
-        for z in np.linspace(0, column_height, 13):
+        for z in np.linspace(0, column_height, 7):
             data.append({
                 'x': x,
                 'y': y,
@@ -103,10 +105,10 @@ def create_real_pantheon():
     # 5. 입구 (포르티코에서 내부로)
     print("입구 생성 중...")
     entrance_width = 6
-    entrance_height = 10
+    entrance_height = 6
     
     for x in np.linspace(-entrance_width/2, entrance_width/2, 8):
-        for z in np.linspace(0, entrance_height, 11):
+        for z in np.linspace(0, entrance_height, 7):
             data.append({
                 'x': x,
                 'y': radius,  # 내벽 위치
@@ -136,7 +138,7 @@ def create_real_pantheon():
         x = (radius - 1) * math.cos(angle)
         y = (radius - 1) * math.sin(angle)
         
-        for z in np.linspace(2, 8, 7):
+        for z in np.linspace(1, 4, 4):
             data.append({
                 'x': x,
                 'y': y,
