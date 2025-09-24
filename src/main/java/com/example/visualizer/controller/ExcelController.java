@@ -7,6 +7,7 @@ import com.example.visualizer.service.FileService;
 import com.example.visualizer.view.MainFrame;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,11 +91,15 @@ public class ExcelController {
             
             // 시각화 버튼 활성화
             view.getControlPanel().setRunButtonEnabled(true);
+            
+            // 차트 생성 버튼 활성화 (x, y 좌표가 있는 경우)
+            view.getControlPanel().setCreateChartButtonEnabled(true);
         } else {
             // 초기화
             view.getFileInfoPanel().setSelectedFile(null);
             view.getDataTable().setModel(new javax.swing.table.DefaultTableModel());
             view.getControlPanel().setRunButtonEnabled(false);
+            view.getControlPanel().setCreateChartButtonEnabled(false);
         }
     }
     
@@ -111,5 +116,134 @@ public class ExcelController {
     public void clearExcelData() {
         currentExcelData = null;
         updateUI();
+    }
+    
+    /**
+     * 엑셀 차트 생성 및 저장
+     */
+    public void createExcelChart() {
+        if (currentExcelData == null) {
+            view.showError("먼저 엑셀 파일을 로드해주세요.");
+            return;
+        }
+        
+        try {
+            // 저장할 파일 선택
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("차트가 포함된 엑셀 파일 저장");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel 파일 (*.xlsx)", "xlsx"));
+            
+            // 기본 파일명 설정
+            String defaultFileName = currentExcelData.getFileName();
+            if (defaultFileName.endsWith(".xlsx")) {
+                defaultFileName = defaultFileName.replace(".xlsx", "_with_chart.xlsx");
+            } else {
+                defaultFileName = defaultFileName + "_with_chart.xlsx";
+            }
+            fileChooser.setSelectedFile(new File(defaultFileName));
+            
+            int result = fileChooser.showSaveDialog(view);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File outputFile = fileChooser.getSelectedFile();
+                
+                // .xlsx 확장자 확인
+                if (!outputFile.getName().toLowerCase().endsWith(".xlsx")) {
+                    outputFile = new File(outputFile.getAbsolutePath() + ".xlsx");
+                }
+                
+                // 진행 상태 업데이트
+                view.getProgressPanel().updateProgress(
+                    new ProgressInfo("차트 생성 중...", "엑셀 차트를 생성 중...", true)
+                );
+                
+                // 차트 생성
+                excelService.createExcelChart(currentExcelData, outputFile);
+                
+                // 완료 메시지
+                view.getProgressPanel().updateProgress(
+                    new ProgressInfo(0, "차트 생성 완료", "엑셀 차트가 성공적으로 생성되었습니다: " + outputFile.getName())
+                );
+                
+                // 성공 메시지 표시
+                JOptionPane.showMessageDialog(view, 
+                    "엑셀 차트가 성공적으로 생성되었습니다!\n파일 위치: " + outputFile.getAbsolutePath(),
+                    "차트 생성 완료", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+            }
+            
+        } catch (IOException e) {
+            view.showError("엑셀 차트 생성 오류: " + e.getMessage());
+        } catch (Exception e) {
+            view.showError("예상치 못한 오류: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 기존 엑셀 파일에 차트 추가
+     */
+    public void addChartToExistingFile() {
+        try {
+            // 원본 파일 선택
+            File inputFile = fileService.selectExcelFile(view);
+            if (inputFile == null) {
+                return;
+            }
+            
+            // 파일 유효성 검사
+            if (!excelService.isValidExcelFile(inputFile)) {
+                view.showError("유효하지 않은 엑셀 파일입니다.");
+                return;
+            }
+            
+            // 저장할 파일 선택
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("차트가 추가된 엑셀 파일 저장");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel 파일 (*.xlsx)", "xlsx"));
+            
+            // 기본 파일명 설정
+            String defaultFileName = inputFile.getName();
+            if (defaultFileName.endsWith(".xlsx")) {
+                defaultFileName = defaultFileName.replace(".xlsx", "_with_chart.xlsx");
+            } else {
+                defaultFileName = defaultFileName + "_with_chart.xlsx";
+            }
+            fileChooser.setSelectedFile(new File(defaultFileName));
+            
+            int result = fileChooser.showSaveDialog(view);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File outputFile = fileChooser.getSelectedFile();
+                
+                // .xlsx 확장자 확인
+                if (!outputFile.getName().toLowerCase().endsWith(".xlsx")) {
+                    outputFile = new File(outputFile.getAbsolutePath() + ".xlsx");
+                }
+                
+                // 진행 상태 업데이트
+                view.getProgressPanel().updateProgress(
+                    new ProgressInfo("차트 추가 중...", "기존 엑셀 파일에 차트를 추가 중...", true)
+                );
+                
+                // 차트 추가
+                excelService.addChartToExistingFile(inputFile, outputFile);
+                
+                // 완료 메시지
+                view.getProgressPanel().updateProgress(
+                    new ProgressInfo(0, "차트 추가 완료", "엑셀 파일에 차트가 성공적으로 추가되었습니다: " + outputFile.getName())
+                );
+                
+                // 성공 메시지 표시
+                JOptionPane.showMessageDialog(view, 
+                    "엑셀 파일에 차트가 성공적으로 추가되었습니다!\n파일 위치: " + outputFile.getAbsolutePath(),
+                    "차트 추가 완료", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+            }
+            
+        } catch (IOException e) {
+            view.showError("엑셀 차트 추가 오류: " + e.getMessage());
+        } catch (Exception e) {
+            view.showError("예상치 못한 오류: " + e.getMessage());
+        }
     }
 }

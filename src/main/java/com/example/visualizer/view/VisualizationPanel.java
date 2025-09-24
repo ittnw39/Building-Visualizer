@@ -10,6 +10,7 @@ import java.util.ArrayList;
  */
 public class VisualizationPanel extends JPanel {
     private JLabel imageLabel;
+    private ChartPreviewPanel chartPreviewPanel;
     private Interactive3DViewer interactive3DViewer;
     private JTabbedPane tabbedPane;
     
@@ -19,10 +20,13 @@ public class VisualizationPanel extends JPanel {
     }
     
     private void initializeComponents() {
-        // 이미지 라벨
+        // 이미지 라벨 (기존 호환성을 위해 유지)
         imageLabel = new JLabel("결과 이미지가 여기에 표시됩니다", SwingConstants.CENTER);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+        
+        // 차트 미리보기 패널
+        chartPreviewPanel = new ChartPreviewPanel();
         
         // 3D 뷰어
         interactive3DViewer = new Interactive3DViewer();
@@ -35,7 +39,7 @@ public class VisualizationPanel extends JPanel {
         setLayout(new BorderLayout());
         
         // 탭 추가
-        tabbedPane.addTab("2D 이미지", imageLabel);
+        tabbedPane.addTab("2D 차트", chartPreviewPanel);
         tabbedPane.addTab("3D 인터랙티브", interactive3DViewer);
         
         add(tabbedPane, BorderLayout.CENTER);
@@ -111,6 +115,28 @@ public class VisualizationPanel extends JPanel {
      */
     public Interactive3DViewer getInteractive3DViewer() {
         return interactive3DViewer;
+    }
+    
+    /**
+     * 2D 차트에 좌표 데이터 표시
+     */
+    public void display2DChart(List<ChartPreviewPanel.ChartPoint> points) {
+        SwingUtilities.invokeLater(() -> {
+            if (points != null && !points.isEmpty()) {
+                chartPreviewPanel.updateChart(points);
+                // 2D 차트 탭을 선택
+                tabbedPane.setSelectedIndex(0);
+            }
+        });
+    }
+    
+    /**
+     * 2D 차트 초기화
+     */
+    public void clear2DChart() {
+        SwingUtilities.invokeLater(() -> {
+            chartPreviewPanel.clearChart();
+        });
     }
     
 }

@@ -95,6 +95,17 @@ public class ExcelData {
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
         }
+        
+        // String으로 저장된 숫자도 파싱 시도
+        if (value != null) {
+            try {
+                return Double.parseDouble(value.toString().trim());
+            } catch (NumberFormatException e) {
+                System.err.println("숫자 변환 실패: " + value + " (행: " + row + ", 컬럼: " + columnName + ")");
+                return 0.0;
+            }
+        }
+        
         return 0.0;
     }
     

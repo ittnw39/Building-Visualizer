@@ -10,11 +10,10 @@ public class ControlPanel extends JPanel {
     private JButton openExcelButton;
     private JButton runVisualizationButton;
     private JButton openResultButton;
+    private JButton createChartButton;
+    private JButton addChartButton;
     private JTextField scaleField;
     
-    // 축 단위 설정 필드들
-    private JTextField txtXUnit, txtYUnit, txtZUnit;
-    private JButton btnApplyUnits;
     
     public ControlPanel() {
         initializeComponents();
@@ -25,28 +24,24 @@ public class ControlPanel extends JPanel {
         openExcelButton = new JButton("엑셀 열기");
         runVisualizationButton = new JButton("시각화 실행");
         openResultButton = new JButton("결과 엑셀 열기");
+        createChartButton = new JButton("엑셀 차트 생성");
+        addChartButton = new JButton("기존 파일에 차트 추가");
         scaleField = new JTextField("1.0", 5);
         
-        // 축 단위 설정 필드들
-        txtXUnit = new JTextField("1.0", 4);
-        txtYUnit = new JTextField("1.0", 4);
-        txtZUnit = new JTextField("1.0", 4);
-        btnApplyUnits = new JButton("축 단위 적용");
         
         // 초기 상태 설정
         openResultButton.setEnabled(false);
+        createChartButton.setEnabled(false);
+        addChartButton.setEnabled(true); // 항상 활성화 (파일 선택 방식)
         
         // 스타일 설정
         openExcelButton.setPreferredSize(new Dimension(100, 30));
         runVisualizationButton.setPreferredSize(new Dimension(100, 30));
         openResultButton.setPreferredSize(new Dimension(120, 30));
+        createChartButton.setPreferredSize(new Dimension(120, 30));
+        addChartButton.setPreferredSize(new Dimension(150, 30));
         scaleField.setPreferredSize(new Dimension(60, 25));
         
-        // 축 단위 필드 스타일
-        txtXUnit.setPreferredSize(new Dimension(40, 25));
-        txtYUnit.setPreferredSize(new Dimension(40, 25));
-        txtZUnit.setPreferredSize(new Dimension(40, 25));
-        btnApplyUnits.setPreferredSize(new Dimension(100, 25));
     }
     
     private void setupLayout() {
@@ -59,16 +54,11 @@ public class ControlPanel extends JPanel {
         add(runVisualizationButton);
         add(openResultButton);
         
-        // 축 단위 설정 추가 (3D 뷰어용)
+        // 차트 생성 버튼들 추가
         add(new JSeparator(SwingConstants.VERTICAL));
-        add(new JLabel("축 단위 (3D 뷰어용):"));
-        add(new JLabel("X:"));
-        add(txtXUnit);
-        add(new JLabel("Y:"));
-        add(txtYUnit);
-        add(new JLabel("Z:"));
-        add(txtZUnit);
-        add(btnApplyUnits);
+        add(createChartButton);
+        add(addChartButton);
+        
     }
     
     // Getters
@@ -84,6 +74,14 @@ public class ControlPanel extends JPanel {
         return openResultButton;
     }
     
+    public JButton getCreateChartButton() {
+        return createChartButton;
+    }
+    
+    public JButton getAddChartButton() {
+        return addChartButton;
+    }
+    
     public JTextField getScaleField() {
         return scaleField;
     }
@@ -97,10 +95,16 @@ public class ControlPanel extends JPanel {
         openResultButton.setEnabled(enabled);
     }
     
+    public void setCreateChartButtonEnabled(boolean enabled) {
+        createChartButton.setEnabled(enabled);
+    }
+    
     public void setAllButtonsEnabled(boolean enabled) {
         openExcelButton.setEnabled(enabled);
         runVisualizationButton.setEnabled(enabled);
         openResultButton.setEnabled(enabled);
+        createChartButton.setEnabled(enabled);
+        // addChartButton은 항상 활성화
     }
     
     public String getScaleValue() {
@@ -111,20 +115,4 @@ public class ControlPanel extends JPanel {
         scaleField.setText(value);
     }
     
-    // 축 단위 설정 관련 메서드
-    public JButton getApplyUnitsButton() {
-        return btnApplyUnits;
-    }
-    
-    public String getXUnitValue() {
-        return txtXUnit.getText().trim();
-    }
-    
-    public String getYUnitValue() {
-        return txtYUnit.getText().trim();
-    }
-    
-    public String getZUnitValue() {
-        return txtZUnit.getText().trim();
-    }
 }

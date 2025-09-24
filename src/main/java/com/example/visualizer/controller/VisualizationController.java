@@ -7,6 +7,7 @@ import com.example.visualizer.service.PythonService;
 import com.example.visualizer.service.FileService;
 import com.example.visualizer.view.Interactive3DViewer;
 import com.example.visualizer.view.MainFrame;
+import com.example.visualizer.view.ChartPreviewPanel;
 import javax.swing.*;
 import java.io.File;
 import java.util.List;
@@ -30,7 +31,7 @@ public class VisualizationController {
     }
     
     /**
-     * 시각화 실행
+     * 시각화 실행 (JFreeChart 사용)
      */
     public void runVisualization(ExcelData excelData) {
         if (excelData == null) {
@@ -38,15 +39,10 @@ public class VisualizationController {
             return;
         }
         
-        // 현재 Excel 데이터 저장 (3D 뷰어용)
+        // 현재 Excel 데이터 저장
         this.currentExcelData = excelData;
         
-        // 단위 변환 배율 검증 (축단위 설정 우선 적용)
-        String xUnitText = view.getControlPanel().getXUnitValue();
-        String yUnitText = view.getControlPanel().getYUnitValue();
-        String zUnitText = view.getControlPanel().getZUnitValue();
-        
-        // 단위변환배율 사용 (축단위는 3D 뷰어에서만 개별 적용)
+        // 단위 변환 배율 검증
         final double unitScale;
         try {
             String scaleText = view.getControlPanel().getScaleValue();
@@ -55,7 +51,7 @@ public class VisualizationController {
                 return;
             }
             unitScale = pythonService.parseScale(scaleText);
-            System.out.println("Python 시각화 단위변환배율: " + unitScale);
+            System.out.println("시각화 단위변환배율: " + unitScale);
         } catch (NumberFormatException e) {
             view.showError("단위변환배율에 올바른 숫자를 입력하세요.");
             return;
@@ -64,46 +60,30 @@ public class VisualizationController {
         // UI 상태 업데이트
         view.getControlPanel().setAllButtonsEnabled(false);
         view.getProgressPanel().updateProgress(
-            new ProgressInfo(0, "시각화 시작...", "Python 시각화를 시작합니다...")
+            new ProgressInfo(0, "시각화 시작...", "JFreeChart로 시각화를 시작합니다...")
         );
         
         // 백그라운드에서 시각화 실행
         SwingUtilities.invokeLater(() -> {
             try {
-                // Python 시각화 실행
-                pythonService.runVisualization(excelData, unitScale, this::updateProgress);
+                // 2D 차트 데이터 생성
+                List<ChartPreviewPanel.ChartPoint> chartPoints = createChartPoints(excelData, unitScale);
                 
-                // 결과 파일 경로 찾기 - Downloads 폴더의 실행별 폴더에서 찾기
-                String downloadsPath = System.getProperty("user.home") + File.separator + "Downloads";
-                File downloadsDir = new File(downloadsPath);
-                File[] buildingDirs = downloadsDir.listFiles((dir, name) -> name.startsWith("BuildingVisualizer_"));
+                // 2D 차트 표시
+                view.getVisualizationPanel().display2DChart(chartPoints);
                 
-                File resultFile = null;
-                File imageFile = null;
-                
-                if (buildingDirs != null && buildingDirs.length > 0) {
-                    // 가장 최근 폴더 선택
-                    File latestDir = buildingDirs[0];
-                    for (File dir : buildingDirs) {
-                        if (dir.lastModified() > latestDir.lastModified()) {
-                            latestDir = dir;
-                        }
-                    }
-                    
-                    resultFile = new File(latestDir, "coords_with_plot.xlsx");
-                    imageFile = new File(latestDir, "coords_plot.png");
-                } else {
-                    // 기존 방식 (현재 디렉토리에서 찾기)
-                    resultFile = new File("coords_with_plot.xlsx");
-                    imageFile = new File("coords_plot.png");
+                // 3D 데이터가 있으면 3D 뷰어에도 표시
+                if (excelData.hasZColumn()) {
+                    display3DDataFromExcel();
                 }
                 
-                if (resultFile.exists() && imageFile.exists()) {
-                    lastResult = new VisualizationResult(imageFile, resultFile, unitScale);
-                    updateUIWithResult(lastResult);
-                } else {
-                    throw new RuntimeException("결과 파일을 찾을 수 없습니다.");
-                }
+                // 완료 상태 업데이트
+                view.getProgressPanel().updateProgress(
+                    new ProgressInfo(100, "시각화 완료", "JFreeChart 시각화가 완료되었습니다.")
+                );
+                
+                // 결과 엑셀 열기 버튼 활성화
+                view.getControlPanel().setOpenResultButtonEnabled(true);
                 
             } catch (Exception e) {
                 handleVisualizationError(e);
@@ -112,6 +92,35 @@ public class VisualizationController {
                 view.getControlPanel().setAllButtonsEnabled(true);
             }
         });
+    }
+    
+    /**
+     * 차트 포인트 데이터 생성
+     */
+    private List<ChartPreviewPanel.ChartPoint> createChartPoints(ExcelData excelData, double unitScale) {
+        List<ChartPreviewPanel.ChartPoint> points = new ArrayList<>();
+        
+        System.out.println("차트 포인트 생성 시작:");
+        System.out.println("  - 총 행 수: " + excelData.getRowCount());
+        System.out.println("  - 헤더: " + excelData.getHeaders());
+        System.out.println("  - 단위 변환 배율: " + unitScale);
+        
+        for (int i = 0; i < excelData.getRowCount(); i++) {
+            double x = excelData.getDoubleValue(i, "x") * unitScale;
+            double y = excelData.getDoubleValue(i, "y") * unitScale;
+            double z = excelData.hasZColumn() ? excelData.getDoubleValue(i, "z") * unitScale : 0.0;
+            String type = excelData.hasTypeColumn() ? excelData.getStringValue(i, "type") : "default";
+            
+            // 처음 5개 점의 디버그 정보 출력
+            if (i < 5) {
+                System.out.println("  - 행 " + i + ": x=" + x + ", y=" + y + ", z=" + z + ", type=" + type);
+            }
+            
+            points.add(new ChartPreviewPanel.ChartPoint(x, y, z, type));
+        }
+        
+        System.out.println("차트 포인트 생성 완료: " + points.size() + "개 점");
+        return points;
     }
     
     /**

@@ -40,8 +40,6 @@ public class Interactive3DViewer extends JPanel {
     // 키보드 조작 설명 패널
     private JPanel instructionPanel;
     
-    // 축 단위 설정 (외부에서 설정됨)
-    private double xUnitScale = 1.0, yUnitScale = 1.0, zUnitScale = 1.0;
     
     // 색상 매핑
     private final Map<String, Color> typeColors = new HashMap<>();
@@ -125,15 +123,6 @@ public class Interactive3DViewer extends JPanel {
     }
     
     
-    /**
-     * 축 단위 설정 (외부에서 호출)
-     */
-    public void setUnitScales(double xScale, double yScale, double zScale) {
-        this.xUnitScale = xScale;
-        this.yUnitScale = yScale;
-        this.zUnitScale = zScale;
-        System.out.println("축 단위 설정: X=" + xUnitScale + ", Y=" + yUnitScale + ", Z=" + zUnitScale);
-    }
     
     private void createScene() {
         // 3D 씬 생성
@@ -421,9 +410,9 @@ public class Interactive3DViewer extends JPanel {
             double maxZ = points.stream().mapToDouble(p -> p.z).max().orElse(100);
             
             
-            // 사용자 설정 단위 적용
-            double xRange = (maxX - minX) * xUnitScale;
-            double yRange = (maxY - minY) * yUnitScale;
+            // 기본 단위 적용 (1:1 비율)
+            double xRange = (maxX - minX);
+            double yRange = (maxY - minY);
             double maxXYRange = Math.max(xRange, yRange);
             
             // X, Y축은 동일한 스케일로 정규화 (1:1 비율 유지)
@@ -448,10 +437,10 @@ public class Interactive3DViewer extends JPanel {
                 PhongMaterial material = new PhongMaterial(color);
                 sphere.setMaterial(material);
                 
-                // 위치 설정 (정규화 적용) - 사용자 설정 단위 적용
-                double normalizedX = ((point.x * xUnitScale) + offsetX) / xyScale;
-                double normalizedY = ((point.y * yUnitScale) + offsetY) / xyScale;
-                double normalizedZ = ((point.z * zUnitScale) + offsetZ) / zScale; // 사용자 설정 단위 적용
+                // 위치 설정 (정규화 적용) - 기본 단위 적용
+                double normalizedX = (point.x + offsetX) / xyScale;
+                double normalizedY = (point.y + offsetY) / xyScale;
+                double normalizedZ = (point.z + offsetZ) / zScale;
                 
                 sphere.setTranslateX(normalizedX);
                 sphere.setTranslateY(normalizedY);
@@ -518,9 +507,9 @@ public class Interactive3DViewer extends JPanel {
         double minZ = Double.MAX_VALUE, maxZ = Double.MIN_VALUE;
         
         for (BuildingPoint point : points) {
-            double normalizedX = ((point.x * xUnitScale) + offsetX) / xyScale;
-            double normalizedY = ((point.y * yUnitScale) + offsetY) / xyScale;
-            double normalizedZ = ((point.z * zUnitScale) + offsetZ) / zScale;
+            double normalizedX = (point.x + offsetX) / xyScale;
+            double normalizedY = (point.y + offsetY) / xyScale;
+            double normalizedZ = (point.z + offsetZ) / zScale;
             
             // 원점에서의 거리 계산
             double distance = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY + normalizedZ * normalizedZ);
